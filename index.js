@@ -1,37 +1,20 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
+/* eslint no-console: "off" */
 
-const app = express();
+const app = require('./src/app');
+const db = require('./src/models');
 
-var corsOptions = {
-  origin: "http://localhost:3000"
-};
-
-app.use(cors(corsOptions));
-
-// parse requests of content-type - application/json
-app.use(bodyParser.json());
-
-// parse requests of content-type - application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
-
-
-
-const db = require("./models");
-db.sequelize.sync();
-
-
-// simple route
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to Joaquin application." });
-});
-
-require("./routes/hamburgers.routes")(app);
-
-// set port, listen for requests
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
-});
+db.sequelize
+  .authenticate()
+  .then(() => {
+    console.log('Connection to the database has been established successfully.');
+    app.listen(PORT, (err) => {
+      if (err) {
+        return console.error('Failed', err);
+      }
+      console.log(`Listening on port ${PORT}`);
+      return app;
+    });
+  })
+  .catch((err) => console.error('Unable to connect to the database:', err));
